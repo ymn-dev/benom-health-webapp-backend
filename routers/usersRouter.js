@@ -3,16 +3,11 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const User = require("../model/User.js");
 const crypto = require("crypto");
+const { errorHandler } = require("../utils.js");
 
 const usersRouter = express.Router();
 usersRouter.use(express.json());
 usersRouter.use(express.urlencoded({ extended: true }));
-
-const errorHandler = (message, next, status = 500) => {
-  const myError = new Error(message);
-  myError.status = status;
-  return next(myError);
-};
 
 usersRouter.param("userId", async (req, res, next, id) => {
   try {
