@@ -13,6 +13,7 @@ activitiesRouter.param("activityId", async (req, res, next, id) => {
     const activities = await Activity.findOne({ _id: req.userId });
     const activity = activities.exerciseLog.find((exercise) => exercise._id === id);
     if (!activity) {
+      //should deleted:true also send 404?
       return errorHandler(`activity not found`, next, 404);
     }
     req.activity = activity;
@@ -91,15 +92,36 @@ activitiesRouter.patch("/:activityId", async (req, res, next) => {
     if (picture) myActivity.picture = picture;
     const updatedActivity = await myActivity.save();
     res.json({
-      message: `activity updated successfully`,
+      message: `successfully updated activity `,
       data: updatedActivity,
     });
+    next();
   } catch (err) {
     errorHandler(err, next);
   }
 });
 
-// activitiesRouter.delete();
+activitiesRouter.delete("/:activityId", async (req, res, next) => {
+  try {
+    const myActivity = req.activity;
+    if (myActivity.deleted) {
+      next();
+    }
+    myActivity.deleted = true;
+    const updatedActivity = await myActivity.save();
+    res.json({
+      message: `successfully deleted activity`,
+      data: {
+        exerciseName: myActivity.exerciseName,
+        date: myActivity.date,
+        startTime: myActivity.startTime,
+      },
+    });
+    next();
+  } catch (err) {
+    errorHandler(err, next);
+  }
+});
 
 activitiesRouter.use((err, req, res, next) => {
   const status = err.status || 500;
