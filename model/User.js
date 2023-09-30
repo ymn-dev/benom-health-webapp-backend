@@ -22,11 +22,8 @@ const userSchema = new mongoose.Schema({
   //     calories: String,
   //   },
   // ],
-  exerciseTime: Number,
-  caloriesBurned: Number,
-  liveExerciseTime: Number,
-  liveCaloriesBurned: Number,
   joinDate: String,
+  deleted: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model("User", userSchema, "users");

@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const User = require("../model/User.js");
 const Activity = require("../model/Activity.js");
 const crypto = require("crypto");
-const { errorHandler } = require("../utils.js");
+const { errorHandler, errorHandling } = require("../utils.js");
 
 const usersRouter = express.Router();
 usersRouter.use(express.json());
@@ -12,16 +12,15 @@ usersRouter.use(express.urlencoded({ extended: true }));
 
 usersRouter.param("userId", async (req, res, next, id) => {
   try {
-    const user = await User.findOne({ _id: id }, "_id weight").lean();
-    const { _id, weight } = user;
-    if (!_id) {
+    const user = await User.findOne({ _id: id }, "_id weight deleted").lean();
+    if (!user || user.deleted) {
       // const myError = new Error(`user not found`);
       // myError.status = 404;
       // return next(myError);
       return errorHandler(`user not found`, next, 404);
     }
-    req.weight = weight;
-    req.userId = _id;
+    req.weight = user.weight;
+    req.userId = user._id;
     next();
   } catch (err) {
     // const myError = new Error(err);
@@ -33,7 +32,7 @@ usersRouter.param("userId", async (req, res, next, id) => {
 //fetch one user
 usersRouter.get("/:userId", async (req, res, next) => {
   try {
-    const user = await User.findById(req.userId).select("-password");
+    const user = await User.findById(req.userId).select("-password -deleted");
     res.json({
       data: user,
     });
@@ -46,7 +45,8 @@ usersRouter.get("/:userId", async (req, res, next) => {
 // Route for fetching all users
 usersRouter.get("/", async (req, res, next) => {
   try {
-    const users = await User.find().select("-password"); // Retrieve all users from the database
+    const users = await User.find({ deleted: false }).select("-password -deleted"); // Retrieve all users from the database
+
     res.json({
       data: users,
     });
@@ -74,19 +74,17 @@ usersRouter.post("/", async (req, res, next) => {
 
     const hashedPassword = bcrypt.hashSync(password, 12);
     const _id = crypto.randomUUID();
-    const newUser = new User({
+    const newUser = await User.create({
       _id,
       userName,
       email,
       password: hashedPassword,
       joinDate: new Date().getTime(),
     });
-    const savedUser = await newUser.save();
-    const userLog = new Activity({
+    const userLog = await Activity.create({
       _id,
       exerciseLog: [],
     });
-    const savedUserLog = await userLog.save();
     res.json({
       message: `user created successfully`,
       data: {
@@ -94,6 +92,7 @@ usersRouter.post("/", async (req, res, next) => {
         email,
       },
     });
+    next();
   } catch (err) {
     errorHandler(err, next);
   }
@@ -130,15 +129,29 @@ usersRouter.patch("/:userId", async (req, res, next) => {
       message: `user updated successfully`,
       data: updatedUser,
     });
+    next();
+  } catch (err) {
+    errorHandler(err, next);
+  }
+});
+
+//delete
+usersRouter.delete("/:userId", async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId).select("userName deleted");
+    // console.log(user);
+    // const name = user.userName;
+    user.deleted = true;
+    await user.save();
+    res.json({
+      message: `successfully deleted ${user.userName}`,
+    });
   } catch (err) {
     errorHandler(err, next);
   }
 });
 
 //error handler
-usersRouter.use((err, req, res, next) => {
-  const status = err.status || 500;
-  res.status(status).json({ error: err.message });
-});
+usersRouter.use(errorHandling);
 
 module.exports = usersRouter;

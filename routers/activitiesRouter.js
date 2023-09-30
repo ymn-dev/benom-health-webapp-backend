@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const Activity = require("../model/Activity.js");
-const { errorHandler } = require("../utils.js");
+const { errorHandler, errorHandling } = require("../utils.js");
 
 const activitiesRouter = express.Router({ mergeParams: true });
 activitiesRouter.use(express.json());
@@ -27,11 +27,9 @@ activitiesRouter.get("/", async (req, res, next) => {
   try {
     const myLog = await Activity.findById(req.userId);
     const filterDeletedLog = myLog.exerciseLog.filter((exercise) => !exercise.deleted);
+    myLog.exerciseLog = filterDeletedLog;
     res.json({
-      data: {
-        _id: myLog._id,
-        exerciseLog: filterDeletedLog,
-      },
+      data: myLog,
     });
   } catch (err) {
     errorHandler(err, next);
@@ -46,7 +44,6 @@ activitiesRouter.post("/", async (req, res, next) => {
       return errorHandler(`missing fields`, next, 400);
     }
     const _id = crypto.randomUUID();
-    const deleted = false;
     const userWeight = req.weight || weight;
     const newActivity = {
       _id,
@@ -58,9 +55,18 @@ activitiesRouter.post("/", async (req, res, next) => {
       calories,
       picture,
       createdTime: new Date().getTime(),
-      deleted,
     };
-    const result = await Activity.updateOne({ _id: req.userId }, { $push: { exerciseLog: newActivity } });
+    const result = await Activity.updateOne(
+      { _id: req.userId },
+      {
+        $push: { exerciseLog: newActivity },
+        $inc: {
+          exerciseTime: Number(duration),
+          caloriesBurned: Number(calories),
+        },
+      }
+    );
+    delete newActivity.deleted;
     if (result.acknowledged) {
       res.json({
         message: `successfully updated activity`,
@@ -88,13 +94,21 @@ activitiesRouter.patch("/:activityId", async (req, res, next) => {
     const myActivity = myLog.exerciseLog[req.activityIndex];
     const { startTime, duration, calories, picture } = req.body;
     if (startTime) myActivity.startTime = startTime;
-    if (duration) myActivity.duration = duration;
-    if (calories) myActivity.calories = calories;
+    if (duration) {
+      myLog.exerciseTime -= Number(myActivity.duration);
+      myActivity.duration = duration;
+      myLog.exerciseTime += Number(myActivity.duration);
+    }
+    if (calories) {
+      myLog.caloriesBurned -= Number(myActivity.calories);
+      myActivity.calories = calories;
+      myLog.caloriesBurned += Number(myActivity.calories);
+    }
     if (picture) myActivity.picture = picture;
     const updatedActivity = await myLog.save();
     res.json({
       message: `successfully updated activity `,
-      data: updatedActivity,
+      data: updatedActivity.exerciseLog[req.activityIndex],
     });
     next();
   } catch (err) {
@@ -107,6 +121,8 @@ activitiesRouter.delete("/:activityId", async (req, res, next) => {
     const myLog = req.activities;
     const myActivity = myLog.exerciseLog[req.activityIndex];
     myActivity.deleted = true;
+    myLog.caloriesBurned -= Number(myActivity.calories);
+    myLog.exerciseTime -= Number(myActivity.duration);
     await myLog.save();
     res.json({
       message: `successfully deleted activity`,
@@ -123,9 +139,6 @@ activitiesRouter.delete("/:activityId", async (req, res, next) => {
   }
 });
 
-activitiesRouter.use((err, req, res, next) => {
-  const status = err.status || 500;
-  res.status(status).json({ error: err.message });
-});
+activitiesRouter.use(errorHandling);
 
 module.exports = activitiesRouter;
