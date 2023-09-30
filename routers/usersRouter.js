@@ -2,48 +2,104 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const User = require("../model/User.js");
+const crypto = require("crypto");
 
 const usersRouter = express.Router();
 usersRouter.use(express.json());
 usersRouter.use(express.urlencoded({ extended: true }));
 
+const errorHandler = (message, next, status = 500) => {
+  const myError = new Error(message);
+  myError.status = status;
+  return next(myError);
+};
+
 usersRouter.param("userId", async (req, res, next, id) => {
   try {
     const user = await User.findById(id);
     if (!user) {
-      res.status(404).json({
-        error: `user not found`,
-      });
+      // const myError = new Error(`user not found`);
+      // myError.status = 404;
+      // return next(myError);
+      return errorHandler(`user not found`, next, 404);
     }
     req.user = user;
     next();
   } catch (err) {
-    console.error("Error fetching user:", err);
-    res.status(500).json({ error: "Internal server error" });
+    // const myError = new Error(err);
+    // return next(myError);
+    errorHandler(err, next);
   }
 });
 
 //fetch one user
-usersRouter.get("/:userId", async (req, res) => {
+usersRouter.get("/:userId", async (req, res, next) => {
   res.json({
     data: req.user,
   });
+  next();
 });
 
 // Route for fetching all users
-usersRouter.get("/", async (req, res) => {
+usersRouter.get("/", async (req, res, next) => {
   try {
     const users = await User.find(); // Retrieve all users from the database
     res.json({
       data: users,
     });
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    res.status(500).json({ error: "Internal server error" });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+  next();
+});
+
+usersRouter.post("/", async (req, res, next) => {
+  try {
+    const { userName, email, password } = req.body;
+    if (!userName || !email || !password) {
+      return errorHandler(`missing fields`, next, 400);
+    }
+    const existingUser = await User.findOne({ userName });
+    const existingEmail = await User.findOne({ email });
+    if (existingUser) {
+      return errorHandler(`username is in use`, next, 400);
+    }
+    if (existingEmail) {
+      return errorHandler(`email is in use`, next, 400);
+    }
+
+    const hashedPassword = bcrypt.hashSync(password, 12);
+    const _id = crypto.randomUUID();
+    const newUser = new User({
+      _id,
+      userName,
+      email,
+      password: hashedPassword,
+      joinDate: new Date().getTime(),
+    });
+    console.log(newUser);
+    try {
+      const savedUser = await newUser.save();
+      console.log(savedUser);
+      res.json({
+        message: `user created successfully`,
+        data: {
+          userName,
+          email,
+        },
+      });
+    } catch (err) {
+      return errorHandler(err, next);
+    }
+  } catch (err) {
+    errorHandler(err, next);
   }
 });
-// const hashedPassword = bcrypt.hashSync(password, 12);
 
-// const validPassword = bcrypt.compareSync(password, db.user.password);
+//error handler
+usersRouter.use((err, req, res, next) => {
+  const status = err.status || 500;
+  res.status(status).json({ error: err.message });
+});
 
 module.exports = usersRouter;

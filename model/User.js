@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema({
   caloriesBurned: Number,
   liveExerciseTime: Number,
   liveCaloriesBurned: Number,
+  joinDate: String,
 });
 
 module.exports = mongoose.model("User", userSchema);
