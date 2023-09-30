@@ -5,6 +5,7 @@ const exerciseSchema = new mongoose.Schema({
   exerciseLog: [
     {
       _id: String,
+      exerciseName: String,
       date: String,
       weight: String,
       startTime: String,

@@ -25,7 +25,7 @@ app.use(morgan(":date[web] REQUEST: :method :url via :user-agent STATUS :status 
 //user routes
 app.use("/users", usersRouter);
 //make activities route using same params as user
-usersRouter.use("/userId/activities", activitiesRouter);
+usersRouter.use("/:userId/activities", activitiesRouter);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
