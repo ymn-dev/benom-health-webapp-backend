@@ -16,14 +16,14 @@ const errorHandler = (message, next, status = 500) => {
 
 usersRouter.param("userId", async (req, res, next, id) => {
   try {
-    const user = await User.findById(id);
-    if (!user) {
+    const userId = await User.findOne({ _id: id }, "_id").lean();
+    if (!userId) {
       // const myError = new Error(`user not found`);
       // myError.status = 404;
       // return next(myError);
       return errorHandler(`user not found`, next, 404);
     }
-    req.user = user;
+    req.userId = userId;
     next();
   } catch (err) {
     // const myError = new Error(err);
@@ -34,10 +34,15 @@ usersRouter.param("userId", async (req, res, next, id) => {
 
 //fetch one user
 usersRouter.get("/:userId", async (req, res, next) => {
-  res.json({
-    data: req.user,
-  });
-  next();
+  try {
+    const user = await User.findById(req.userId);
+    res.json({
+      data: user,
+    });
+    next();
+  } catch (err) {
+    errorHandler(err, next);
+  }
 });
 
 // Route for fetching all users
@@ -53,6 +58,7 @@ usersRouter.get("/", async (req, res, next) => {
   next();
 });
 
+//create user
 usersRouter.post("/", async (req, res, next) => {
   try {
     const { userName, email, password } = req.body;
@@ -95,6 +101,8 @@ usersRouter.post("/", async (req, res, next) => {
     errorHandler(err, next);
   }
 });
+
+usersRouter.patch("/:userId", (req, res, next) => {});
 
 //error handler
 usersRouter.use((err, req, res, next) => {
