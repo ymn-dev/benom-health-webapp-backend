@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
 const usersRouter = require("./routers/usersRouter.js");
+const activitiesRouter = require("./routers/activitiesRouter.js");
 // Define a mongoose model for your "users" collection
 
 const app = express();
@@ -21,9 +22,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 //logger
 app.use(morgan(":date[web] REQUEST: :method :url via :user-agent STATUS :status (:response-time ms)"));
-
 //user routes
 app.use("/users", usersRouter);
+//make activities route using same params as user
+usersRouter.use("/userId/activities", activitiesRouter);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

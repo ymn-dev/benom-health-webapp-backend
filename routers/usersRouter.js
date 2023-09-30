@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const User = require("../model/User.js");
+const Activity = require("../model/Activity.js");
 const crypto = require("crypto");
 const { errorHandler } = require("../utils.js");
 
@@ -79,6 +80,11 @@ usersRouter.post("/", async (req, res, next) => {
       joinDate: new Date().getTime(),
     });
     const savedUser = await newUser.save();
+    const userLog = new Activity({
+      _id,
+      exerciseLog: [],
+    });
+    const savedUserLog = await userLog.save();
     res.json({
       message: `user created successfully`,
       data: {
