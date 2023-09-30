@@ -35,7 +35,7 @@ usersRouter.param("userId", async (req, res, next, id) => {
 //fetch one user
 usersRouter.get("/:userId", async (req, res, next) => {
   try {
-    const user = await User.findById(req.userId);
+    const user = await User.findById(req.userId).select("-password");
     res.json({
       data: user,
     });
@@ -48,7 +48,7 @@ usersRouter.get("/:userId", async (req, res, next) => {
 // Route for fetching all users
 usersRouter.get("/", async (req, res, next) => {
   try {
-    const users = await User.find(); // Retrieve all users from the database
+    const users = await User.find().select("-password"); // Retrieve all users from the database
     res.json({
       data: users,
     });
@@ -83,26 +83,54 @@ usersRouter.post("/", async (req, res, next) => {
       password: hashedPassword,
       joinDate: new Date().getTime(),
     });
-    console.log(newUser);
-    try {
-      const savedUser = await newUser.save();
-      console.log(savedUser);
-      res.json({
-        message: `user created successfully`,
-        data: {
-          userName,
-          email,
-        },
-      });
-    } catch (err) {
-      return errorHandler(err, next);
-    }
+    const savedUser = await newUser.save();
+    res.json({
+      message: `user created successfully`,
+      data: {
+        userName,
+        email,
+      },
+    });
   } catch (err) {
     errorHandler(err, next);
   }
 });
 
-usersRouter.patch("/:userId", (req, res, next) => {});
+//edit user
+usersRouter.patch("/:userId", async (req, res, next) => {
+  try {
+    const { firstName, lastName, profilePicture, gender, birthday, height, weight, dailyCalories } = req.body;
+    const myUser = await User.findById(req.userId).select("-password");
+    if (myUser.birthday) {
+      return errorHandler(`you can put birthday only once`, next, 400);
+    }
+    if (myUser.firstName) {
+      return errorHandler(`you can put first name only once`, next, 400);
+    }
+    if (myUser.lastName) {
+      return errorHandler(`you can put last name only once`, next, 400);
+    }
+    if (myUser.gender) {
+      return errorHandler(`you can put gender only once`, next, 400);
+    }
+    if (firstName) myUser.firstName = firstName;
+    if (lastName) myUser.lastName = lastName;
+    if (profilePicture) myUser.profilePicture = profilePicture;
+    if (gender) myUser.gender = gender;
+    if (birthday) myUser.birthday = birthday;
+    if (height) myUser.height = height;
+    if (weight) myUser.weight = weight;
+    if (dailyCalories) myUser.dailyCalories = dailyCalories;
+    const updatedUser = await myUser.save();
+    delete updatedUser.password;
+    res.json({
+      message: `user updated successfully`,
+      data: updatedUser,
+    });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+});
 
 //error handler
 usersRouter.use((err, req, res, next) => {
