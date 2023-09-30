@@ -25,14 +25,19 @@ activitiesRouter.param("activityId", async (req, res, next, id) => {
 activitiesRouter.get("/", async (req, res, next) => {
   try {
     const myLog = await Activity.findById(req.userId);
+    const filterDeletedLog = myLog.exerciseLog.filter((exercise) => !exercise.deleted);
     res.json({
-      data: myLog,
+      data: {
+        _id: myLog._id,
+        exerciseLog: filterDeletedLog,
+      },
     });
   } catch (err) {
     errorHandler(err, next);
   }
 });
 
+//add activity
 activitiesRouter.post("/", async (req, res, next) => {
   try {
     const { exerciseName, date, weight, startTime, duration, calories, picture } = req.body;
@@ -41,11 +46,12 @@ activitiesRouter.post("/", async (req, res, next) => {
     }
     const _id = crypto.randomUUID();
     const deleted = false;
+    const userWeight = req.weight || weight;
     const newActivity = {
       _id,
       exerciseName,
       date,
-      weight,
+      weight: userWeight,
       startTime,
       duration,
       calories,
@@ -60,7 +66,7 @@ activitiesRouter.post("/", async (req, res, next) => {
         data: newActivity,
       });
     } else {
-      return; //to catch
+      return; //to catch block
     }
     next();
   } catch (err) {
@@ -75,7 +81,23 @@ activitiesRouter.get("/:activityId", async (req, res, next) => {
   next();
 });
 
-// activitiesRouter.put();
+activitiesRouter.patch("/:activityId", async (req, res, next) => {
+  try {
+    const myActivity = req.activity;
+    const { startTime, duration, calories, picture } = req.body;
+    if (startTime) myActivity.startTime = startTime;
+    if (duration) myActivity.duration = duration;
+    if (calories) myActivity.calories = calories;
+    if (picture) myActivity.picture = picture;
+    const updatedActivity = await myActivity.save();
+    res.json({
+      message: `activity updated successfully`,
+      data: updatedActivity,
+    });
+  } catch (err) {
+    errorHandler(err, next);
+  }
+});
 
 // activitiesRouter.delete();
 

@@ -12,14 +12,16 @@ usersRouter.use(express.urlencoded({ extended: true }));
 
 usersRouter.param("userId", async (req, res, next, id) => {
   try {
-    const userId = await User.findOne({ _id: id }, "_id").lean();
-    if (!userId) {
+    const user = await User.findOne({ _id: id }, "_id weight").lean();
+    const { _id, weight } = user;
+    if (!_id) {
       // const myError = new Error(`user not found`);
       // myError.status = 404;
       // return next(myError);
       return errorHandler(`user not found`, next, 404);
     }
-    req.userId = userId;
+    req.weight = weight;
+    req.userId = _id;
     next();
   } catch (err) {
     // const myError = new Error(err);
