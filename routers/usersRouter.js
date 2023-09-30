@@ -4,34 +4,42 @@ const bcrypt = require("bcrypt");
 const User = require("../model/User.js");
 
 const usersRouter = express.Router();
+usersRouter.use(express.json());
+usersRouter.use(express.urlencoded({ extended: true }));
 
-usersRouter.get("/:id", async (req, res) => {
+usersRouter.param("userId", async (req, res, next, id) => {
   try {
-    const userId = req.params.id; // Get the user ID from the URL parameter
-
-    // Retrieve the user with the specified ID from the database
-    const user = await User.findById(userId);
-    console.log(user);
+    const user = await User.findById(id);
     if (!user) {
-      // If no user is found with the given ID, return a 404 Not Found response
-      return res.status(404).json({ error: "User not found" });
+      res.status(404).json({
+        error: `user not found`,
+      });
     }
-
-    res.json(user); // Send the user as a JSON response
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ error: "Internal server error" }); // Handle errors gracefully
+    req.user = user;
+    next();
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
+});
+
+//fetch one user
+usersRouter.get("/:userId", async (req, res) => {
+  res.json({
+    data: req.user,
+  });
 });
 
 // Route for fetching all users
 usersRouter.get("/", async (req, res) => {
   try {
     const users = await User.find(); // Retrieve all users from the database
-    res.json(users); // Send the users as JSON response
+    res.json({
+      data: users,
+    });
   } catch (error) {
     console.error("Error fetching users:", error);
-    res.status(500).json({ error: "Internal server error" }); // Handle errors gracefully
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 // const hashedPassword = bcrypt.hashSync(password, 12);
