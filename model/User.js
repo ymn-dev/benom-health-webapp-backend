@@ -13,15 +13,15 @@ const userSchema = new mongoose.Schema({
   height: Number,
   weight: Number,
   dailyCalories: Number,
-  exerciseLog: [
-    {
-      date: String,
-      weight: String,
-      startTime: String,
-      duration: String,
-      calories: String,
-    },
-  ],
+  // exerciseLog: [
+  //   {
+  //     date: String,
+  //     weight: String,
+  //     startTime: String,
+  //     duration: String,
+  //     calories: String,
+  //   },
+  // ],
   exerciseTime: Number,
   caloriesBurned: Number,
   liveExerciseTime: Number,
