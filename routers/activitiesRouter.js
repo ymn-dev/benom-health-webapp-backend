@@ -11,12 +11,12 @@ activitiesRouter.use(express.urlencoded({ extended: true }));
 activitiesRouter.param("activityId", async (req, res, next, id) => {
   try {
     const activities = await Activity.findOne({ _id: req.userId });
-    const activity = activities.exerciseLog.find((exercise) => exercise._id === id);
-    if (!activity) {
-      //should deleted:true also send 404?
+    const activityIndex = activities.exerciseLog.findIndex((exercise) => exercise._id === id);
+    if (activityIndex === -1 || activities.exerciseLog[activityIndex].deleted) {
       return errorHandler(`activity not found`, next, 404);
     }
-    req.activity = activity;
+    req.activities = activities;
+    req.activityIndex = activityIndex;
     next();
   } catch (err) {
     errorHandler(err, next);
@@ -77,20 +77,21 @@ activitiesRouter.post("/", async (req, res, next) => {
 
 activitiesRouter.get("/:activityId", async (req, res, next) => {
   res.json({
-    data: req.activity,
+    data: req.activities.exerciseLog[req.activityIndex],
   });
   next();
 });
 
 activitiesRouter.patch("/:activityId", async (req, res, next) => {
   try {
-    const myActivity = req.activity;
+    const myLog = req.activities;
+    const myActivity = myLog.exerciseLog[req.activityIndex];
     const { startTime, duration, calories, picture } = req.body;
     if (startTime) myActivity.startTime = startTime;
     if (duration) myActivity.duration = duration;
     if (calories) myActivity.calories = calories;
     if (picture) myActivity.picture = picture;
-    const updatedActivity = await myActivity.save();
+    const updatedActivity = await myLog.save();
     res.json({
       message: `successfully updated activity `,
       data: updatedActivity,
@@ -103,12 +104,10 @@ activitiesRouter.patch("/:activityId", async (req, res, next) => {
 
 activitiesRouter.delete("/:activityId", async (req, res, next) => {
   try {
-    const myActivity = req.activity;
-    if (myActivity.deleted) {
-      next();
-    }
+    const myLog = req.activities;
+    const myActivity = myLog.exerciseLog[req.activityIndex];
     myActivity.deleted = true;
-    const updatedActivity = await myActivity.save();
+    await myLog.save();
     res.json({
       message: `successfully deleted activity`,
       data: {
@@ -117,6 +116,7 @@ activitiesRouter.delete("/:activityId", async (req, res, next) => {
         startTime: myActivity.startTime,
       },
     });
+
     next();
   } catch (err) {
     errorHandler(err, next);
