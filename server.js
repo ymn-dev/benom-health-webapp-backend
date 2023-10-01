@@ -1,9 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const helmet = require("helmet");
 const morgan = require("morgan");
 const usersRouter = require("./routers/usersRouter.js");
 const activitiesRouter = require("./routers/activitiesRouter.js");
-// Define a mongoose model for your "users" collection
+const loginRouter = require("./routers/loginRouter.js");
 
 const app = express();
 
@@ -20,12 +21,14 @@ connectLoop();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(helmet());
 //logger
 app.use(morgan(":date[web] REQUEST: :method :url via :user-agent STATUS :status (:response-time ms)"));
 //user routes
 app.use("/users", usersRouter);
 //make activities route using same params as user
 usersRouter.use("/:userId/activities", activitiesRouter);
+app.use("/signin", loginRouter);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
