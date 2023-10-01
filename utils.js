@@ -1,4 +1,14 @@
 const jwt = require("jsonwebtoken");
+require("dotenv").config();
+
+const createJwt = ({ userName, email }) => {
+  //secret key generated via crypto.randomBytes(32).toString("hex");
+  const jwtSecretKey = process.env.JWT_SECRET_KEY;
+  const token = jwt.sign({ userName, email }, jwtSecretKey, {
+    expiresIn: "2h",
+  });
+  return token;
+};
 
 const errorHandler = (message, next, status = 500) => {
   const myError = new Error(message);
@@ -41,4 +51,4 @@ const getBMI = (height, weight) => {
   return weight / ((height / 100) * (height / 100));
 };
 
-module.exports = { errorHandler, errorHandling, getAge, getBMR, getBMI };
+module.exports = { createJwt, errorHandler, errorHandling, getAge, getBMR, getBMI };

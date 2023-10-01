@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const User = require("../model/User.js");
-const { errorHandler, errorHandling } = require("../utils.js");
+const { errorHandler, errorHandling, createJwt } = require("../utils.js");
 
 const loginRouter = express.Router();
 loginRouter.use(express.json());
@@ -25,7 +25,8 @@ loginRouter.post("/", async (req, res, next) => {
     if (!validPassword) {
       return errorHandler(`invalid account or password`, next, 400);
     }
-    res.json({ message: `${user.userName} successfully logged in` });
+    const myJwt = createJwt({ userName: user.userName, email: user.email });
+    res.json({ token: myJwt });
   } catch (err) {
     errorHandler(err, next);
   }
