@@ -1,15 +1,6 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const createJwt = ({ userName, email }) => {
-  //secret key generated via crypto.randomBytes(32).toString("hex");
-  const jwtSecretKey = process.env.JWT_SECRET_KEY;
-  const token = jwt.sign({ userName, email }, jwtSecretKey, {
-    expiresIn: "2h",
-  });
-  return token;
-};
-
 const errorHandler = (message, next, status = 500) => {
   const myError = new Error(message);
   myError.status = status;
@@ -19,6 +10,32 @@ const errorHandler = (message, next, status = 500) => {
 const errorHandling = (err, req, res, next) => {
   const status = err.status || 500;
   res.status(status).json({ error: err.message });
+};
+
+const createJwt = ({ _id, userName }) => {
+  //secret key generated via crypto.randomBytes(32).toString("hex");
+  const jwtSecretKey = process.env.JWT_SECRET_KEY;
+  const token = jwt.sign({ _id, userName }, jwtSecretKey, {
+    expiresIn: "2h",
+  });
+  return token;
+};
+
+const authorization = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  const jwtSecretKey = process.env.JWT_SECRET_KEY;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return errorHandler(`Unauthorized`, next, 401);
+  }
+  const token = authHeader.split(" ")[1]; // Get the token part after "Bearer"
+  try {
+    const decoded = jwt.verify(token, jwtSecretKey);
+    req.userName = decoded.userName;
+    next();
+  } catch (err) {
+    return errorHandler(`invalid token`, next, 400);
+  }
 };
 
 const getAge = (birthday) => {
