@@ -43,6 +43,7 @@ usersRouter.get("/:userId", async (req, res, next) => {
 });
 
 // Route for fetching all users
+//maybe add middleware isAdmin ******************************************** after authorization
 usersRouter.get("/", async (req, res, next) => {
   try {
     const users = await User.find({ deleted: false }).select("-password -deleted"); // Retrieve all users from the database
@@ -71,15 +72,14 @@ usersRouter.post("/", async (req, res, next) => {
     if (existingEmail) {
       return errorHandler(`email is in use`, next, 400);
     }
-
-    const hashedPassword = bcrypt.hashSync(password, 12);
+    const hashedPassword = await bcrypt.hash(password, 12);
     const _id = crypto.randomUUID();
     const newUser = await User.create({
       _id,
       userName,
       email,
       password: hashedPassword,
-      joinDate: new Date().getTime(),
+      joinDate: new Date(),
     });
     const userLog = await Activity.create({
       _id,
@@ -125,6 +125,7 @@ usersRouter.patch("/:userId", async (req, res, next) => {
     if (dailyCalories) myUser.dailyCalories = dailyCalories;
     const updatedUser = await myUser.save();
     delete updatedUser.password;
+    delete updatedUser.deleted;
     res.json({
       message: `user updated successfully`,
       data: updatedUser,

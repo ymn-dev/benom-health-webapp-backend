@@ -21,7 +21,7 @@ loginRouter.post("/", async (req, res, next) => {
     if (!user) {
       return errorHandler(`invalid account or password`, next, 404);
     }
-    const validPassword = bcrypt.compareSync(password, user.password);
+    const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       return errorHandler(`invalid account or password`, next, 400);
     }

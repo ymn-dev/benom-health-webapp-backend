@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
   //     calories: String,
   //   },
   // ],
-  joinDate: String,
+  joinDate: Date,
   deleted: { type: Boolean, default: false },
 });
 

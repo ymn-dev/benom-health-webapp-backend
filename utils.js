@@ -12,6 +12,7 @@ const errorHandling = (err, req, res, next) => {
   res.status(status).json({ error: err.message });
 };
 
+//to save in cookies/local storage ***********************************
 const createJwt = ({ _id, userName }) => {
   //secret key generated via crypto.randomBytes(32).toString("hex");
   const jwtSecretKey = process.env.JWT_SECRET_KEY;
@@ -31,7 +32,7 @@ const authorization = (req, res, next) => {
   const token = authHeader.split(" ")[1]; // Get the token part after "Bearer"
   try {
     const decoded = jwt.verify(token, jwtSecretKey);
-    req.userName = decoded.userName;
+    //to add matching user later*****************************
     next();
   } catch (err) {
     return errorHandler(`invalid token`, next, 400);
