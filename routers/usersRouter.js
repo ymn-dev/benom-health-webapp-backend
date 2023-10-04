@@ -52,7 +52,7 @@ usersRouter.get("/", authentication, isAdmin, async (req, res, next) => {
 });
 
 //create user
-usersRouter.post("/", authorization, async (req, res, next) => {
+usersRouter.post("/", async (req, res, next) => {
   try {
     const { userName, email, password } = req.body;
     if (!userName || !email || !password) {
