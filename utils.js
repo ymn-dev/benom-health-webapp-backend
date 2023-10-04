@@ -21,10 +21,8 @@ const createJwt = ({ _id, userName }) => {
   return token;
 };
 
-const authorization = (req, res, next) => {
+const verifyToken = (req, res, next) => {
   const jwtSecretKey = process.env.JWT_SECRET_KEY;
-
-  //via cookie
   const token = req.cookies.token;
   if (!token) {
     return errorHandler(`missing token`, next, 401);
@@ -32,24 +30,35 @@ const authorization = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, jwtSecretKey);
-
-    if (decoded._id === req.userId) {
-      next();
-    } else if (decoded.userName.startsWith("admin")) {
-      next();
-    } else {
-      res.clearCookie("token");
-      return errorHandler(`Unauthorized: Access Denied`, next, 403);
-    }
+    return decoded;
   } catch (err) {
     res.clearCookie("token");
     return errorHandler(`invalid token`, next, 400);
   }
 };
 
+const authentication = (req, res, next) => {
+  const decoded = verifyToken(req, res, next);
+  if (decoded) {
+    req.me = decoded._id;
+    next();
+  }
+};
+
+const authorization = (req, res, next) => {
+  const decoded = verifyToken(req, res, next);
+  if (decoded) {
+    if (decoded._id === req.userId || decoded.userName.startsWith("admin")) {
+      next();
+    } else {
+      res.clearCookie("token");
+      return errorHandler(`Unauthorized: Access Denied`, next, 403);
+    }
+  }
+};
+
 const isAdmin = (req, res, next) => {
-  console.log(req.userId);
-  if (req.userId === "651b642c-112e-482d-88f6-20d3e78dc363") {
+  if (req.me === "651b642c-112e-482d-88f6-20d3e78dc363") {
     return next();
   }
   return errorHandler(`Unauthorized: Access Denied`, next, 403);
@@ -85,4 +94,4 @@ const getBMI = (height, weight) => {
   return weight / ((height / 100) * (height / 100));
 };
 
-module.exports = { createJwt, errorHandler, errorHandling, authorization, isAdmin, getAge, getBMR, getBMI };
+module.exports = { createJwt, errorHandler, errorHandling, authentication, authorization, isAdmin, getAge, getBMR, getBMI };

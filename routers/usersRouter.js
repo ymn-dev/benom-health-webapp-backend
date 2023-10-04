@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const User = require("../model/User.js");
 const Activity = require("../model/Activity.js");
 const crypto = require("crypto");
-const { errorHandler, errorHandling, authorization, isAdmin } = require("../utils.js");
+const { errorHandler, errorHandling, authorization, authentication, isAdmin } = require("../utils.js");
 
 const usersRouter = express.Router();
 usersRouter.use(express.json());
@@ -26,7 +26,6 @@ usersRouter.param("userId", async (req, res, next, id) => {
 
 //fetch one user
 usersRouter.get("/:userId", authorization, async (req, res, next) => {
-  console.log(req.userId);
   try {
     const user = await User.findById(req.userId).select("-password -deleted");
     res.json({
@@ -39,7 +38,7 @@ usersRouter.get("/:userId", authorization, async (req, res, next) => {
 });
 
 // Route for fetching all users
-usersRouter.get("/", authorization, isAdmin, async (req, res, next) => {
+usersRouter.get("/", authentication, isAdmin, async (req, res, next) => {
   try {
     const users = await User.find({ deleted: false }).select("-password -deleted"); // Retrieve all users from the database
 

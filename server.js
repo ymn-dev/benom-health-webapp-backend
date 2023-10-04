@@ -37,7 +37,9 @@ app.use(morgan(":date[web] REQUEST: :method :url via :user-agent STATUS :status 
 app.use("/users", usersRouter);
 //make activities route using same params as user
 usersRouter.use("/:userId/activities", activitiesRouter);
+
 app.use("/signin", loginRouter);
+
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

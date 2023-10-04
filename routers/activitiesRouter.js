@@ -8,7 +8,7 @@ const activitiesRouter = express.Router({ mergeParams: true });
 activitiesRouter.use(express.json());
 activitiesRouter.use(express.urlencoded({ extended: true }));
 
-activitiesRouter.param("activityId", authorization, async (req, res, next, id) => {
+activitiesRouter.param("activityId", async (req, res, next, id) => {
   try {
     const activities = await Activity.findOne({ _id: req.userId });
     const activityIndex = activities.exerciseLog.findIndex((exercise) => exercise.logId === id);
