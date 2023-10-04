@@ -9,10 +9,9 @@ const errorHandler = (message, next, status = 500) => {
 
 const errorHandling = (err, req, res, next) => {
   const status = err.status || 500;
-  res.status(status).json({ error: err.message });
+  return res.status(status).json({ error: err.message });
 };
 
-//to save in cookies/local storage ***********************************
 const createJwt = ({ _id, userName }) => {
   //secret key generated via crypto.randomBytes(32).toString("hex");
   const jwtSecretKey = process.env.JWT_SECRET_KEY;
@@ -23,20 +22,37 @@ const createJwt = ({ _id, userName }) => {
 };
 
 const authorization = (req, res, next) => {
-  const authHeader = req.headers.authorization;
   const jwtSecretKey = process.env.JWT_SECRET_KEY;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return errorHandler(`Unauthorized`, next, 401);
+  //via cookie
+  const token = req.cookies.token;
+  if (!token) {
+    return errorHandler(`missing token`, next, 401);
   }
-  const token = authHeader.split(" ")[1]; // Get the token part after "Bearer"
+
   try {
     const decoded = jwt.verify(token, jwtSecretKey);
-    //to add matching user later*****************************
-    next();
+
+    if (decoded._id === req.userId) {
+      next();
+    } else if (decoded.userName.startsWith("admin")) {
+      next();
+    } else {
+      res.clearCookie("token");
+      return errorHandler(`Unauthorized: Access Denied`, next, 403);
+    }
   } catch (err) {
+    res.clearCookie("token");
     return errorHandler(`invalid token`, next, 400);
   }
+};
+
+const isAdmin = (req, res, next) => {
+  console.log(req.userId);
+  if (req.userId === "651b642c-112e-482d-88f6-20d3e78dc363") {
+    return next();
+  }
+  return errorHandler(`Unauthorized: Access Denied`, next, 403);
 };
 
 const getAge = (birthday) => {
@@ -69,4 +85,4 @@ const getBMI = (height, weight) => {
   return weight / ((height / 100) * (height / 100));
 };
 
-module.exports = { createJwt, errorHandler, errorHandling, getAge, getBMR, getBMI };
+module.exports = { createJwt, errorHandler, errorHandling, authorization, isAdmin, getAge, getBMR, getBMI };

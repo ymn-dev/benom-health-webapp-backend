@@ -25,7 +25,8 @@ loginRouter.post("/", async (req, res, next) => {
     if (!validPassword) {
       return errorHandler(`invalid account or password`, next, 400);
     }
-    const myJwt = createJwt({ userName: user.userName, email: user.email });
+    const myJwt = createJwt({ _id: user._id, userName: user.userName });
+    res.cookie("token", myJwt, { httpOnly: true });
     res.json({ token: myJwt });
   } catch (err) {
     errorHandler(err, next);

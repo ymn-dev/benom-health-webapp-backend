@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const User = require("../model/User.js");
 const Activity = require("../model/Activity.js");
 const crypto = require("crypto");
-const { errorHandler, errorHandling } = require("../utils.js");
+const { errorHandler, errorHandling, authorization, isAdmin } = require("../utils.js");
 
 const usersRouter = express.Router();
 usersRouter.use(express.json());
@@ -14,23 +14,19 @@ usersRouter.param("userId", async (req, res, next, id) => {
   try {
     const user = await User.findOne({ _id: id }, "_id weight deleted").lean();
     if (!user || user.deleted) {
-      // const myError = new Error(`user not found`);
-      // myError.status = 404;
-      // return next(myError);
       return errorHandler(`user not found`, next, 404);
     }
     req.weight = user.weight;
     req.userId = user._id;
     next();
   } catch (err) {
-    // const myError = new Error(err);
-    // return next(myError);
     errorHandler(err, next);
   }
 });
 
 //fetch one user
-usersRouter.get("/:userId", async (req, res, next) => {
+usersRouter.get("/:userId", authorization, async (req, res, next) => {
+  console.log(req.userId);
   try {
     const user = await User.findById(req.userId).select("-password -deleted");
     res.json({
@@ -43,8 +39,7 @@ usersRouter.get("/:userId", async (req, res, next) => {
 });
 
 // Route for fetching all users
-//maybe add middleware isAdmin ******************************************** after authorization
-usersRouter.get("/", async (req, res, next) => {
+usersRouter.get("/", authorization, isAdmin, async (req, res, next) => {
   try {
     const users = await User.find({ deleted: false }).select("-password -deleted"); // Retrieve all users from the database
 
@@ -58,7 +53,7 @@ usersRouter.get("/", async (req, res, next) => {
 });
 
 //create user
-usersRouter.post("/", async (req, res, next) => {
+usersRouter.post("/", authorization, async (req, res, next) => {
   try {
     const { userName, email, password } = req.body;
     if (!userName || !email || !password) {
@@ -71,6 +66,9 @@ usersRouter.post("/", async (req, res, next) => {
     }
     if (existingEmail) {
       return errorHandler(`email is in use`, next, 400);
+    }
+    if (userName.startsWith("admin")) {
+      return errorHandler(`username cannot start with 'admin'`, next, 400);
     }
     const hashedPassword = await bcrypt.hash(password, 12);
     const _id = crypto.randomUUID();
@@ -99,7 +97,7 @@ usersRouter.post("/", async (req, res, next) => {
 });
 
 //edit user
-usersRouter.patch("/:userId", async (req, res, next) => {
+usersRouter.patch("/:userId", authorization, async (req, res, next) => {
   try {
     const { firstName, lastName, profilePicture, gender, birthday, height, weight, dailyCalories } = req.body;
     const myUser = await User.findById(req.userId).select("-password");
@@ -137,7 +135,7 @@ usersRouter.patch("/:userId", async (req, res, next) => {
 });
 
 //delete
-usersRouter.delete("/:userId", async (req, res, next) => {
+usersRouter.delete("/:userId", authorization, async (req, res, next) => {
   try {
     const user = await User.findById(req.userId).select("userName deleted");
     // console.log(user);

@@ -2,13 +2,13 @@ const express = require("express");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const Activity = require("../model/Activity.js");
-const { errorHandler, errorHandling } = require("../utils.js");
+const { errorHandler, errorHandling, authorization } = require("../utils.js");
 
 const activitiesRouter = express.Router({ mergeParams: true });
 activitiesRouter.use(express.json());
 activitiesRouter.use(express.urlencoded({ extended: true }));
 
-activitiesRouter.param("activityId", async (req, res, next, id) => {
+activitiesRouter.param("activityId", authorization, async (req, res, next, id) => {
   try {
     const activities = await Activity.findOne({ _id: req.userId });
     const activityIndex = activities.exerciseLog.findIndex((exercise) => exercise.logId === id);
@@ -23,21 +23,23 @@ activitiesRouter.param("activityId", async (req, res, next, id) => {
   }
 });
 
-activitiesRouter.get("/", async (req, res, next) => {
+activitiesRouter.get("/", authorization, async (req, res, next) => {
   try {
     const myLog = await Activity.findById(req.userId).select("-deleted");
+
     const filterDeletedLog = myLog.exerciseLog.filter((exercise) => !exercise.deleted);
     myLog.exerciseLog = filterDeletedLog;
     res.json({
       data: myLog,
     });
   } catch (err) {
-    errorHandler(err, next);
+    return errorHandler(err, next);
   }
 });
 
 //add activity
-activitiesRouter.post("/", async (req, res, next) => {
+activitiesRouter.post("/", authorization, async (req, res, next) => {
+  console.log(next);
   try {
     const { exerciseName, date, weight, startTime, duration, calories, picture } = req.body;
     if (!exerciseName || !date || !weight || !startTime || !duration) {
@@ -81,14 +83,14 @@ activitiesRouter.post("/", async (req, res, next) => {
   }
 });
 
-activitiesRouter.get("/:activityId", async (req, res, next) => {
+activitiesRouter.get("/:activityId", authorization, async (req, res, next) => {
   res.json({
     data: req.activities.exerciseLog[req.activityIndex],
   });
   next();
 });
 
-activitiesRouter.patch("/:activityId", async (req, res, next) => {
+activitiesRouter.patch("/:activityId", authorization, async (req, res, next) => {
   try {
     const myLog = req.activities;
     const myActivity = myLog.exerciseLog[req.activityIndex];
@@ -116,7 +118,7 @@ activitiesRouter.patch("/:activityId", async (req, res, next) => {
   }
 });
 
-activitiesRouter.delete("/:activityId", async (req, res, next) => {
+activitiesRouter.delete("/:activityId", authorization, async (req, res, next) => {
   try {
     const myLog = req.activities;
     const myActivity = myLog.exerciseLog[req.activityIndex];

@@ -3,9 +3,11 @@ const { ReadPreference } = require("mongodb");
 const mongoose = require("mongoose");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const cors = require("cors");
 const usersRouter = require("./routers/usersRouter.js");
 const activitiesRouter = require("./routers/activitiesRouter.js");
 const loginRouter = require("./routers/loginRouter.js");
+const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
 const app = express();
@@ -24,7 +26,11 @@ connectLoop();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
-//to add CORS *****************
+app.use(cookieParser());
+const corsOptions = {
+  credentials: true,
+};
+app.use(cors(corsOptions));
 //logger
 app.use(morgan(":date[web] REQUEST: :method :url via :user-agent STATUS :status (:response-time ms)"));
 //user routes
@@ -32,7 +38,6 @@ app.use("/users", usersRouter);
 //make activities route using same params as user
 usersRouter.use("/:userId/activities", activitiesRouter);
 app.use("/signin", loginRouter);
-
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
