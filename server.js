@@ -1,4 +1,5 @@
 const express = require("express");
+const { ReadPreference } = require("mongodb");
 const mongoose = require("mongoose");
 const helmet = require("helmet");
 const morgan = require("morgan");
@@ -11,7 +12,7 @@ const app = express();
 
 const connectLoop = () => {
   mongoose
-    .connect(process.env.DATABASE_KEY)
+    .connect(process.env.DATABASE_KEY, { serverApi: { version: "1", strict: false }, autoIndex: false, readPreference: ReadPreference.PRIMARY_PREFERRED })
     .then(() => console.log("Connected to MongoDB"))
     .catch((err) => {
       console.error("Failed to connect to MongoDB:", err);
