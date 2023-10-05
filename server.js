@@ -28,6 +28,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(helmet());
 app.use(cookieParser());
+// const corsOptions = { origin: 'https://benom-health-webapp-frontend.vercel.app/', credentials: true }
 const corsOptions = {
   credentials: true,
 };
