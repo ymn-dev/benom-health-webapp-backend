@@ -31,7 +31,7 @@ loginRouter.post("/", async (req, res, next) => {
     }
     const myJwt = createJwt({ _id: user._id, userName: user.userName });
     res.cookie("token", myJwt, { httpOnly: true });
-    res.json({ token: myJwt });
+    res.json({ token: myJwt, _id: user._id });
   } catch (err) {
     errorHandler(err, next);
   }
