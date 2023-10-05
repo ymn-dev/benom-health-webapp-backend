@@ -7,7 +7,10 @@ const { errorHandler, errorHandling, createJwt } = require("../utils.js");
 const loginRouter = express.Router();
 loginRouter.use(express.json());
 loginRouter.use(express.urlencoded({ extended: true }));
-
+//check if "deleted user can login"***********************
+loginRouter.get("/", async (req, res, next) => {
+  res.send("asdfasdfsfasfsf");
+});
 loginRouter.post("/", async (req, res, next) => {
   try {
     const { account, password } = req.body;

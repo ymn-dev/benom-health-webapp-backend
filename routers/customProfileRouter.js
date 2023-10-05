@@ -1,3 +1,6 @@
+/*
+to do stuffs like /me and calling the profile
+unnescessary but good addition
 const { authentication } = require("../utils.js");
 const User = require("../model/User.js");
 app.get("/me", authentication, async (req, res) => {
@@ -15,3 +18,4 @@ app.get("/me", authentication, async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+*/
