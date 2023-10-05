@@ -30,6 +30,7 @@ app.use(helmet());
 app.use(cookieParser());
 // const corsOptions = { origin: 'https://benom-health-webapp-frontend.vercel.app/', credentials: true }
 const corsOptions = {
+  origin: true,
   credentials: true,
 };
 app.use(cors(corsOptions));
