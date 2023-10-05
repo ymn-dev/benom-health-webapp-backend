@@ -23,11 +23,12 @@ const createJwt = ({ _id, userName }) => {
 
 const verifyToken = (req, res, next) => {
   const jwtSecretKey = process.env.JWT_SECRET_KEY;
-  const token = req.cookies.token;
-  if (!token) {
+  // const token = req.cookies.token;
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return errorHandler(`missing token`, next, 401);
   }
-
+  const token = authHeader.split(" ")[1]; // Get the token part after "Bearer"
   try {
     const decoded = jwt.verify(token, jwtSecretKey);
     return decoded;
