@@ -150,6 +150,5 @@ usersRouter.delete("/:userId", authorization, async (req, res, next) => {
 });
 
 //error handler
-usersRouter.use(errorHandling);
 
 module.exports = usersRouter;

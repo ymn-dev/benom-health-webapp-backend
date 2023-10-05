@@ -8,6 +8,7 @@ const usersRouter = require("./routers/usersRouter.js");
 const activitiesRouter = require("./routers/activitiesRouter.js");
 const loginRouter = require("./routers/loginRouter.js");
 const cookieParser = require("cookie-parser");
+const { errorHandling } = require("./utils.js");
 require("dotenv").config();
 
 const app = express();
@@ -37,7 +38,7 @@ app.use(morgan(":date[web] REQUEST: :method :url via :user-agent STATUS :status 
 app.use("/users", usersRouter);
 //make activities route using same params as user
 usersRouter.use("/:userId/activities", activitiesRouter);
-
+usersRouter.use(errorHandling);
 app.use("/signin", loginRouter);
 
 const PORT = process.env.PORT || 3001;

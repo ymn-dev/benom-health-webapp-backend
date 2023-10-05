@@ -58,9 +58,11 @@ const authorization = (req, res, next) => {
 };
 
 const isAdmin = (req, res, next) => {
-  if (req.me === "651b642c-112e-482d-88f6-20d3e78dc363") {
+  if (req.me === "2ec2cddc-b4ee-4f72-a28d-10ac95bc4964") {
     return next();
   }
+
+  res.clearCookie("token");
   return errorHandler(`Unauthorized: Access Denied`, next, 403);
 };
 

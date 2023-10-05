@@ -141,6 +141,4 @@ activitiesRouter.delete("/:activityId", authorization, async (req, res, next) =>
   }
 });
 
-activitiesRouter.use(errorHandling);
-
 module.exports = activitiesRouter;
