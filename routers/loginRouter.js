@@ -3,13 +3,14 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const User = require("../model/User.js");
 const { errorHandler, errorHandling, createJwt } = require("../utils.js");
+const fs = require("fs");
 
 const loginRouter = express.Router();
 loginRouter.use(express.json());
 loginRouter.use(express.urlencoded({ extended: true }));
 //check if "deleted user can login"***********************
-loginRouter.get("/", async (req, res, next) => {
-  res.send("asdfasdfsfasfsf");
+loginRouter.get("/", (req, res, next) => {
+  res.json({ message: `this is a signin path` });
 });
 loginRouter.post("/", async (req, res, next) => {
   try {

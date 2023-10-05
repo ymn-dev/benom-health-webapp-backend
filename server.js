@@ -35,6 +35,9 @@ app.use(cors(corsOptions));
 //logger
 app.use(morgan(":date[web] REQUEST: :method :url via :user-agent STATUS :status (:response-time ms)"));
 //user routes
+app.use("/", (req, res) => {
+  res.json({ message: `the server is up` });
+});
 app.use("/users", usersRouter);
 //make activities route using same params as user
 usersRouter.use("/:userId/activities", activitiesRouter);
