@@ -12,11 +12,11 @@ const errorHandling = (err, req, res, next) => {
   return res.status(status).json({ error: err.message });
 };
 
-const createJwt = ({ _id, userName }) => {
+const createJwt = ({ _id, userName }, lifeSpan = "2h") => {
   //secret key generated via crypto.randomBytes(32).toString("hex");
   const jwtSecretKey = process.env.JWT_SECRET_KEY;
   const token = jwt.sign({ _id, userName }, jwtSecretKey, {
-    expiresIn: "2h",
+    expiresIn: lifeSpan,
   });
   return token;
 };
