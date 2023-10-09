@@ -11,6 +11,7 @@ const exerciseSchema = new mongoose.Schema({
       _id: String,
       exerciseName: String,
       date: Date,
+      dateTime: Date,
       weight: String,
       startTime: String,
       duration: String,

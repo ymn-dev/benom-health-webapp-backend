@@ -47,12 +47,15 @@ activitiesRouter.post("/", authorization, async (req, res, next) => {
     }
     const logId = crypto.randomUUID();
     const userWeight = req.weight || weight;
+    const [hours, minutes] = startTime.split(":");
+    const dateTime = date.setHours(hours, minutes);
     const newActivity = {
       logId,
       exerciseName,
       date,
-      weight: userWeight,
       startTime,
+      dateTime,
+      weight: userWeight,
       duration,
       calories,
       picture,

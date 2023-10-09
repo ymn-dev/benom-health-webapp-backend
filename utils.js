@@ -33,7 +33,7 @@ const verifyToken = (req, res, next) => {
     const decoded = jwt.verify(token, jwtSecretKey);
     return decoded;
   } catch (err) {
-    res.clearCookie("token");
+    // res.clearCookie("token");
     return errorHandler(`invalid token`, next, 400);
   }
 };
@@ -52,7 +52,7 @@ const authorization = (req, res, next) => {
     if (decoded._id === req.userId || decoded.userName.startsWith("admin")) {
       next();
     } else {
-      res.clearCookie("token");
+      // res.clearCookie("token");
       return errorHandler(`Unauthorized: Access Denied`, next, 403);
     }
   }
@@ -63,7 +63,7 @@ const isAdmin = (req, res, next) => {
     return next();
   }
 
-  res.clearCookie("token");
+  // res.clearCookie("token");
   return errorHandler(`Unauthorized: Access Denied`, next, 403);
 };
 
