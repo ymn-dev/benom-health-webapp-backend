@@ -6,10 +6,20 @@ const morgan = require("morgan");
 const cors = require("cors");
 const usersRouter = require("./routers/usersRouter.js");
 const activitiesRouter = require("./routers/activitiesRouter.js");
+
 const loginRouter = require("./routers/loginRouter.js");
 const cookieParser = require("cookie-parser");
 const { errorHandling } = require("./utils.js");
 require("dotenv").config();
+
+//import 6 exercises
+const cyclingRouter = require("./routers/cyclingRouter.js");
+const calisthenicsRouter = require("./routers/calisthenicsRouter.js");
+const runningRouter = require("./routers/runningRouter.js");
+const swimmingRouter = require("./routers/swimmingRouter.js");
+const walkingRouter = require("./routers/walkingRouter.js");
+const yogaRouter = require("./routers/yogaRouter.js");
+//End import 6 exercises
 
 const app = express();
 
@@ -46,6 +56,16 @@ app.use("/users", usersRouter);
 usersRouter.use("/:userId/activities", activitiesRouter);
 usersRouter.use(errorHandling);
 app.use("/signin", loginRouter);
+
+//Use 6 exercises
+app.use("/cycling", cyclingRouter);
+app.use("/calisthenics", calisthenicsRouter);
+app.use("/running", runningRouter);
+app.use("/swimming", swimmingRouter);
+app.use("/walking", walkingRouter);
+app.use("/yoga", yogaRouter);
+//End Use 6 exercises
+
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

@@ -14,7 +14,7 @@ const exerciseSchema = new mongoose.Schema({
       weight: String,
       startTime: String,
       duration: String,
-      calories: String,
+      calories: Number,
       picture: String,
       createdTime: Date,
       deleted: Boolean,
