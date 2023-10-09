@@ -39,7 +39,6 @@ activitiesRouter.get("/", authorization, async (req, res, next) => {
 
 //add activity
 activitiesRouter.post("/", authorization, async (req, res, next) => {
-  console.log(next);
   try {
     const { exerciseName, date, weight, startTime, duration, calories, picture } = req.body;
     if (!exerciseName || !date || !weight || !startTime || !duration) {
@@ -48,7 +47,9 @@ activitiesRouter.post("/", authorization, async (req, res, next) => {
     const logId = crypto.randomUUID();
     const userWeight = req.weight || weight;
     const [hours, minutes] = startTime.split(":");
-    const dateTime = date.setHours(hours, minutes);
+    const dateTime = new Date(date);
+    dateTime.setHours(hours, minutes);
+    dateTime.toISOString();
     const newActivity = {
       logId,
       exerciseName,
