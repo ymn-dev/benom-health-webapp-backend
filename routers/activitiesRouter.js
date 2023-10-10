@@ -11,7 +11,7 @@ activitiesRouter.use(express.urlencoded({ extended: true }));
 activitiesRouter.param("activityId", async (req, res, next, id) => {
   try {
     const activities = await Activity.findOne({ _id: req.userId });
-    const activityIndex = activities.exerciseLog.findIndex((exercise) => exercise.logId === id);
+    const activityIndex = activities.exerciseLog.findIndex((exercise) => exercise._id === id);
     if (activityIndex === -1 || activities.exerciseLog[activityIndex].deleted) {
       return errorHandler(`activity not found`, next, 404);
     }
@@ -44,14 +44,14 @@ activitiesRouter.post("/", authorization, async (req, res, next) => {
     if (!exerciseName || !date || !weight || !startTime || !duration) {
       return errorHandler(`missing fields`, next, 400);
     }
-    const logId = crypto.randomUUID();
+    const _id = crypto.randomUUID();
     const userWeight = req.weight || weight;
     const [hours, minutes] = startTime.split(":");
     const dateTime = new Date(date);
     dateTime.setHours(hours, minutes);
     dateTime.toISOString();
     const newActivity = {
-      logId,
+      _id,
       exerciseName,
       date,
       startTime,

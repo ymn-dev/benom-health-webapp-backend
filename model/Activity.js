@@ -8,7 +8,7 @@ const exerciseSchema = new mongoose.Schema({
   liveCaloriesBurned: { type: Number, default: 0 },
   exerciseLog: [
     {
-      logId: String,
+      _id: String,
       exerciseName: String,
       date: Date,
       dateTime: Date,
