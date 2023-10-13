@@ -8,7 +8,6 @@ const fs = require("fs");
 const loginRouter = express.Router();
 loginRouter.use(express.json());
 loginRouter.use(express.urlencoded({ extended: true }));
-//check if "deleted user can login"***********************
 loginRouter.get("/", (req, res, next) => {
   res.json({ message: `this is a signin path` });
 });
@@ -22,7 +21,7 @@ loginRouter.post("/", async (req, res, next) => {
 
     const user = await User.findOne(query, "userName email password").lean();
 
-    if (!user) {
+    if (!user || user.deleted) {
       return errorHandler(`invalid account or password`, next, 404);
     }
     const validPassword = await bcrypt.compare(password, user.password);

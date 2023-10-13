@@ -97,4 +97,9 @@ const getBMI = (height, weight) => {
   return weight / ((height / 100) * (height / 100));
 };
 
-module.exports = { createJwt, errorHandler, errorHandling, authentication, authorization, isAdmin, getAge, getBMR, getBMI };
+const getCalories = (MET, weight, duration) => {
+  if (isNaN(MET) || isNaN(weight) || isNaN(duration)) return null;
+  return (3.5 * MET * weight * duration) / 200;
+};
+
+module.exports = { createJwt, errorHandler, errorHandling, authentication, authorization, isAdmin, getAge, getBMR, getBMI, getCalories };
