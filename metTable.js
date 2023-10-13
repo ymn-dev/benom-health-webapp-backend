@@ -42,7 +42,7 @@ const exercises = {
     stretching: 2.8,
   },
 };
-// Cycling,Calisthenics,Running,Swimming,Walking,Yoga
+
 const getMET = (exerciseString) => {
   const [type, variation] = exerciseString.split(":");
   if (exercises[type] && exercises[type][variation]) {

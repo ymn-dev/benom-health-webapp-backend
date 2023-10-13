@@ -2,7 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const Activity = require("../model/Activity.js");
-const { errorHandler, errorHandling, authorization } = require("../utils.js");
+const { getMET } = require("../metTable.js");
+const { errorHandler, errorHandling, authorization, getCalories } = require("../utils.js");
 
 const activitiesRouter = express.Router({ mergeParams: true });
 activitiesRouter.use(express.json());
@@ -41,15 +42,17 @@ activitiesRouter.get("/", authorization, async (req, res, next) => {
 activitiesRouter.post("/", authorization, async (req, res, next) => {
   try {
     const { exerciseName, date, weight, startTime, duration, calories, picture } = req.body;
-    if (!exerciseName || !date || !weight || !startTime || !duration) {
+    const userWeight = req.weight || Number(weight);
+    if (!exerciseName || !date || !startTime || !duration || !userWeight) {
       return errorHandler(`missing fields`, next, 400);
     }
     const _id = crypto.randomUUID();
-    const userWeight = req.weight || weight;
     const [hours, minutes] = startTime.split(":");
     const dateTime = new Date(date);
     dateTime.setHours(hours, minutes);
     dateTime.toISOString();
+
+    const autoCalcCalories = !calories ? getCalories(getMET(exerciseName), userWeight, duration) : Number(calories);
     const newActivity = {
       _id,
       exerciseName,
@@ -57,8 +60,8 @@ activitiesRouter.post("/", authorization, async (req, res, next) => {
       startTime,
       dateTime,
       weight: userWeight,
-      duration,
-      calories,
+      duration: Number(duration),
+      calories: autoCalcCalories,
       picture,
       createdTime: new Date(),
     };
@@ -94,6 +97,7 @@ activitiesRouter.get("/:activityId", authorization, async (req, res, next) => {
   next();
 });
 
+//might not use this after all
 activitiesRouter.patch("/:activityId", authorization, async (req, res, next) => {
   try {
     const myLog = req.activities;
