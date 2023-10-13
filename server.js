@@ -13,6 +13,7 @@ const { errorHandling } = require("./utils.js");
 require("dotenv").config();
 
 const caloriesRouter = require("./routers/caloriesRouter.js");
+const resetPasswordRouter = require("./routers/resetPasswordRouter.js");
 
 const app = express();
 
@@ -51,6 +52,7 @@ usersRouter.use(errorHandling);
 app.use("/signin", loginRouter);
 
 app.use("/calories", caloriesRouter);
+app.use("/resetPassword", resetPasswordRouter);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
