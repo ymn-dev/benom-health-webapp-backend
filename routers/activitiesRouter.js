@@ -61,7 +61,7 @@ activitiesRouter.post("/", authorization, async (req, res, next) => {
       dateTime,
       weight: userWeight,
       duration: Number(duration),
-      calories: autoCalcCalories,
+      calories: autoCalcCalories.toFixed(2),
       picture,
       createdTime: new Date(),
     };

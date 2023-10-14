@@ -99,7 +99,7 @@ const getBMI = (height, weight) => {
 
 const getCalories = (MET, weight, duration) => {
   if (isNaN(MET) || isNaN(weight) || isNaN(duration)) return null;
-  return (3.5 * MET * weight * duration) / 200;
+  return (3.5 * Number(MET) * Number(weight) * Number(duration)) / 200;
 };
 
 module.exports = { createJwt, errorHandler, errorHandling, authentication, authorization, isAdmin, getAge, getBMR, getBMI, getCalories };

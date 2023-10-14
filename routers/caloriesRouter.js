@@ -12,7 +12,7 @@ caloriesRouter.post("/", (req, res, next) => {
     const MET = getMET(activity);
     const weight = req.body.weight;
     const duration = req.body.duration;
-    const calories = getCalories(MET, weight, duration);
+    const calories = getCalories(MET, weight, duration).toFixed(2);
     res.json({ calories });
   } catch (err) {
     return errorHandler(err, next);
