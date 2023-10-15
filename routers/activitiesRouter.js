@@ -52,7 +52,7 @@ activitiesRouter.post("/", authorization, async (req, res, next) => {
     dateTime.setHours(hours, minutes);
     dateTime.toISOString();
 
-    const autoCalcCalories = !calories ? getCalories(getMET(exerciseName), userWeight, duration) : Number(calories);
+    const autoCalcCalories = !calories ? Number(getCalories(getMET(exerciseName), userWeight, duration).toFixed(2)) : Number(calories);
     const newActivity = {
       _id,
       exerciseName,
@@ -61,7 +61,7 @@ activitiesRouter.post("/", authorization, async (req, res, next) => {
       dateTime,
       weight: userWeight,
       duration: Number(duration),
-      calories: autoCalcCalories.toFixed(2),
+      calories: autoCalcCalories,
       picture,
       createdTime: new Date(),
     };
@@ -71,7 +71,7 @@ activitiesRouter.post("/", authorization, async (req, res, next) => {
         $push: { exerciseLog: newActivity },
         $inc: {
           exerciseTime: Number(duration),
-          caloriesBurned: Number(calories),
+          caloriesBurned: autoCalcCalories,
         },
       }
     );
@@ -111,7 +111,7 @@ activitiesRouter.patch("/:activityId", authorization, async (req, res, next) => 
     }
     if (calories) {
       myLog.caloriesBurned -= Number(myActivity.calories);
-      myActivity.calories = calories;
+      myActivity.calories = calories.toFixed(2);
       myLog.caloriesBurned += Number(myActivity.calories);
     }
     if (picture) myActivity.picture = picture;
