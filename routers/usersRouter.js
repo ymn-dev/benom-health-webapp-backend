@@ -100,16 +100,16 @@ usersRouter.patch("/:userId", authorization, async (req, res, next) => {
   try {
     const { firstName, lastName, profilePicture, gender, birthday, height, weight, dailyCalories } = req.body;
     const myUser = await User.findById(req.userId).select("-password");
-    if (myUser.birthday) {
+    if (myUser.birthday && birthday) {
       return errorHandler(`you can put birthday only once`, next, 400);
     }
-    if (myUser.firstName) {
+    if (myUser.firstName && firstName) {
       return errorHandler(`you can put first name only once`, next, 400);
     }
-    if (myUser.lastName) {
+    if (myUser.lastName && lastName) {
       return errorHandler(`you can put last name only once`, next, 400);
     }
-    if (myUser.gender) {
+    if (myUser.gender && gender) {
       return errorHandler(`you can put gender only once`, next, 400);
     }
     if (firstName) myUser.firstName = firstName;
