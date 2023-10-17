@@ -40,7 +40,7 @@ usersRouter.get("/:userId", authorization, async (req, res, next) => {
 // Route for fetching all users
 usersRouter.get("/", authentication, isAdmin, async (req, res, next) => {
   try {
-    const users = await User.find({ deleted: false }).select("-password -deleted"); // Retrieve all users from the database
+    const users = await User.find().select("-password"); // Retrieve all users from the database
 
     res.json({
       data: users,
@@ -99,7 +99,10 @@ usersRouter.post("/", async (req, res, next) => {
 usersRouter.patch("/:userId", authorization, async (req, res, next) => {
   try {
     const { firstName, lastName, profilePicture, gender, birthday, height, weight, dailyCalories } = req.body;
-    const myUser = await User.findById(req.userId).select("-password");
+    const myUser = await User.findOne({ _id: req.userId, deleted: false }).select("-password -deleted");
+    if (!myUser) {
+      return errorHandler(`this user doesnt exist`, next, 404);
+    }
     if (myUser.birthday && birthday) {
       return errorHandler(`you can put birthday only once`, next, 400);
     }
@@ -121,8 +124,6 @@ usersRouter.patch("/:userId", authorization, async (req, res, next) => {
     if (weight) myUser.weight = weight;
     if (dailyCalories) myUser.dailyCalories = dailyCalories;
     const updatedUser = await myUser.save();
-    delete updatedUser.password;
-    delete updatedUser.deleted;
     res.json({
       message: `user updated successfully`,
       data: updatedUser,
