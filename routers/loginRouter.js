@@ -19,7 +19,7 @@ loginRouter.post("/", async (req, res, next) => {
     }
     const query = account.indexOf("@") > -1 ? { email: account } : { userName: account };
 
-    const user = await User.findOne(query, "userName email password").lean();
+    const user = await User.findOne(query, "userName email password deleted").lean();
 
     if (!user || user.deleted) {
       return errorHandler(`invalid account or password`, next, 404);

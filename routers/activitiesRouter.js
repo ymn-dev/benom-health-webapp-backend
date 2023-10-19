@@ -97,7 +97,6 @@ activitiesRouter.get("/:activityId", authorization, async (req, res, next) => {
   next();
 });
 
-//might not use this after all
 activitiesRouter.patch("/:activityId", authorization, async (req, res, next) => {
   try {
     const myLog = req.activities;
@@ -109,11 +108,14 @@ activitiesRouter.patch("/:activityId", authorization, async (req, res, next) => 
       myActivity.duration = duration;
       myLog.exerciseTime += Number(myActivity.duration);
     }
+
+    myLog.caloriesBurned -= Number(myActivity.calories);
     if (calories) {
-      myLog.caloriesBurned -= Number(myActivity.calories);
       myActivity.calories = calories.toFixed(2);
-      myLog.caloriesBurned += Number(myActivity.calories);
+    } else {
+      myActivity.calories = Number(getCalories(getMET(exerciseName), myActivity.weight, myActivity.duration).toFixed(2));
     }
+    myLog.caloriesBurned += Number(myActivity.calories);
     if (picture) myActivity.picture = picture;
     const updatedActivity = await myLog.save();
     res.json({
