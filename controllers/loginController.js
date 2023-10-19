@@ -1,6 +1,6 @@
 const bcrypt = require("bcrypt");
 const User = require("../model/User.js");
-const { errorHandler, errorHandling, createJwt } = require("../utils.js");
+const { errorHandler, createJwt } = require("../utils.js");
 
 const loginValidation = async (req, res, next) => {
   try {
