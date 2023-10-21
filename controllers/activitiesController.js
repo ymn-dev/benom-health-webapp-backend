@@ -101,6 +101,8 @@ const editActivity = async (req, res, next) => {
       myActivity.duration = duration;
       myLog.exerciseTime += Number(myActivity.duration);
     }
+    if (exerciseName) myActivity.exerciseName = exerciseName;
+    if (weight) myActivity.weight = weight;
 
     myLog.caloriesBurned -= Number(myActivity.calories);
     if (calories) {
