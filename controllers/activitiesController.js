@@ -93,7 +93,8 @@ const editActivity = async (req, res, next) => {
   try {
     const myLog = req.activities;
     const myActivity = myLog.exerciseLog[req.activityIndex];
-    const { startTime, duration, calories, picture } = req.body;
+    const { exerciseName, date, weight, startTime, duration, calories, picture } = req.body;
+    if (date) myLog.date = date;
     if (startTime) myActivity.startTime = startTime;
     if (duration) {
       myLog.exerciseTime -= Number(myActivity.duration);
@@ -105,7 +106,7 @@ const editActivity = async (req, res, next) => {
     if (calories) {
       myActivity.calories = calories.toFixed(2);
     } else {
-      myActivity.calories = Number(getCalories(getMET(exerciseName), myActivity.weight, myActivity.duration).toFixed(2));
+      myActivity.calories = Number(getCalories(getMET(exerciseName), weight, duration).toFixed(2));
     }
     myLog.caloriesBurned += Number(myActivity.calories);
     if (picture) myActivity.picture = picture;
