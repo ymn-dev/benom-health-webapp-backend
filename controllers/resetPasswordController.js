@@ -30,8 +30,9 @@ const resetAccountCheck = async (req, res, next) => {
     const mailOptions = {
       from: "benomwebapp@gmail.com",
       to: email,
-      subject: "Password Reset Request for Benom Webapplication",
-      text: `There was a request for password change, If you did not request a new password, please ignore this email\n
+      subject: "Password Reset Request for Benom Webapplication - Do not reply",
+      text: `This is an automated message - do not reply\n
+      There was a request for password change, If you did not request a new password, please ignore this email.\n
       click this link to reset password https://benom-health-webapp-frontend.vercel.app/resetpassword?token=${token}`,
     };
     transporter.sendMail(mailOptions, function (error, info) {
