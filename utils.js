@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const passwordValidator = require("password-validator");
+const isEmail = require("validator/lib/isEmail");
 require("dotenv").config();
 
 const errorHandler = (message, next, status = 500) => {
@@ -103,7 +104,7 @@ const getCalories = (MET, weight, duration) => {
   return (3.5 * Number(MET) * Number(weight) * Number(duration)) / 200;
 };
 
-const validPassword = (password) => {
+const isValidPassword = (password) => {
   const pwVa = new passwordValidator();
   pwVa.is().min(8);
   pwVa.has().uppercase();
@@ -114,4 +115,15 @@ const validPassword = (password) => {
   return pwVa.validate(password);
 };
 
-module.exports = { validPassword, createJwt, errorHandler, errorHandling, authentication, authorization, isAdmin, getAge, getBMR, getBMI, getCalories };
+const isValidUsername = (inputString) => {
+  const alphanumericRegex = /^[a-zA-Z0-9_-]+$/;
+
+  return alphanumericRegex.test(inputString);
+};
+
+const isValidEmail = (email) => {
+  const processedEmail = email.trim().toLowerCase();
+  return isEmail(processedEmail, { allow_utf8_local_part: false });
+};
+
+module.exports = { isValidEmail, isValidUsername, isValidPassword, createJwt, errorHandler, errorHandling, authentication, authorization, isAdmin, getAge, getBMR, getBMI, getCalories };
