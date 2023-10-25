@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const passwordValidator = require("password-validator");
 require("dotenv").config();
 
 const errorHandler = (message, next, status = 500) => {
@@ -102,4 +103,15 @@ const getCalories = (MET, weight, duration) => {
   return (3.5 * Number(MET) * Number(weight) * Number(duration)) / 200;
 };
 
-module.exports = { createJwt, errorHandler, errorHandling, authentication, authorization, isAdmin, getAge, getBMR, getBMI, getCalories };
+const validPassword = (password) => {
+  const pwVa = new passwordValidator();
+  pwVa.is().min(8);
+  pwVa.has().uppercase();
+  pwVa.has().lowercase();
+  pwVa.has().symbols();
+  pwVa.has().digits();
+  pwVa.has().not().spaces();
+  return pwVa.validate(password);
+};
+
+module.exports = { validPassword, createJwt, errorHandler, errorHandling, authentication, authorization, isAdmin, getAge, getBMR, getBMI, getCalories };

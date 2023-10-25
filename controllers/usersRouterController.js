@@ -1,6 +1,6 @@
 const User = require("../model/User.js");
 const Activity = require("../model/Activity.js");
-const { errorHandler } = require("../utils.js");
+const { errorHandler, validPassword } = require("../utils.js");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 
@@ -49,6 +49,7 @@ const addUser = async (req, res, next) => {
     if (!userName || !email || !password) {
       return errorHandler(`missing fields`, next, 400);
     }
+    if (!validPassword(password)) return errorHandler(`invalid password`, next, 400);
     const existingUser = await User.findOne({ userName });
     const existingEmail = await User.findOne({ email });
     if (existingUser) {
