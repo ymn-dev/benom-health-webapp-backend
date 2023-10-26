@@ -48,6 +48,9 @@ const addActivity = async (req, res, next) => {
     if (isMinus(duration)) {
       return errorHandler(`duration can't be minus!`, next, 400);
     }
+    if (calories) {
+      if (isMinus(calories)) return errorHandler(`calories can't be minus!`, next, 400);
+    }
     const _id = crypto.randomUUID();
     const [hours, minutes] = startTime.split(":");
     const dateTime = new Date(date);
@@ -112,6 +115,7 @@ const editActivity = async (req, res, next) => {
 
     myLog.caloriesBurned -= Number(myActivity.calories);
     if (calories) {
+      if (isMinus(calories)) return errorHandler(`calories can't be minus!`, next, 400);
       myActivity.calories = calories.toFixed(2);
     } else {
       myActivity.calories = Number(getCalories(getMET(exerciseName), weight, duration).toFixed(2));
