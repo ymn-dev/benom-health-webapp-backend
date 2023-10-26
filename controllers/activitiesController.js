@@ -1,7 +1,7 @@
 const Activity = require("../model/Activity.js");
 const { getMET } = require("../metTable.js");
 const crypto = require("crypto");
-const { errorHandler, getCalories } = require("../utils.js");
+const { errorHandler, getCalories, isMinus } = require("../utils.js");
 const getActivityId = async (req, res, next, id) => {
   try {
     const activities = await Activity.findOne({ _id: req.userId });
@@ -44,6 +44,9 @@ const addActivity = async (req, res, next) => {
     const userWeight = req.weight || Number(weight);
     if (!exerciseName || !date || !startTime || !duration || !userWeight) {
       return errorHandler(`missing fields`, next, 400);
+    }
+    if (isMinus(duration)) {
+      return errorHandler(`duration can't be minus!`, next, 400);
     }
     const _id = crypto.randomUUID();
     const [hours, minutes] = startTime.split(":");
@@ -94,6 +97,9 @@ const editActivity = async (req, res, next) => {
     const myLog = req.activities;
     const myActivity = myLog.exerciseLog[req.activityIndex];
     const { exerciseName, date, weight, startTime, duration, calories, picture } = req.body;
+    if (isMinus(duration)) {
+      return errorHandler(`duration can't be minus!`, next, 400);
+    }
     if (date) myLog.date = date;
     if (startTime) myActivity.startTime = startTime;
     if (duration) {

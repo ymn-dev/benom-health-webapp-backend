@@ -126,4 +126,8 @@ const isValidEmail = (email) => {
   return isEmail(processedEmail, { allow_utf8_local_part: false });
 };
 
-module.exports = { isValidEmail, isValidUsername, isValidPassword, createJwt, errorHandler, errorHandling, authentication, authorization, isAdmin, getAge, getBMR, getBMI, getCalories };
+const isMinus = (num) => {
+  return num < 0;
+};
+
+module.exports = { isMinus, isValidEmail, isValidUsername, isValidPassword, createJwt, errorHandler, errorHandling, authentication, authorization, isAdmin, getAge, getBMR, getBMI, getCalories };
