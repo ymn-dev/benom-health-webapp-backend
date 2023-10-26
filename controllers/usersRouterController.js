@@ -1,6 +1,6 @@
 const User = require("../model/User.js");
 const Activity = require("../model/Activity.js");
-const { errorHandler, isValidPassword, isValidUsername, isValidEmail } = require("../utils.js");
+const { errorHandler, isValidPassword, isValidUsername, isValidEmail, isMinus } = require("../utils.js");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 
@@ -108,13 +108,19 @@ const editUser = async (req, res, next) => {
     if (myUser.gender && gender) {
       return errorHandler(`you can put gender only once`, next, 400);
     }
+    if (weight) {
+      if (isMinus(weight)) return errorHandler(`weight cannot be minus`, next, 400);
+      myUser.weight = weight;
+    }
+    if (height) {
+      if (isMinus(weight)) return errorHandler(`height cannot be minus`, next, 400);
+      myUser.height = height;
+    }
     if (firstName) myUser.firstName = firstName;
     if (lastName) myUser.lastName = lastName;
     if (profilePicture) myUser.profilePicture = profilePicture;
     if (gender) myUser.gender = gender;
     if (birthday) myUser.birthday = birthday;
-    if (height) myUser.height = height;
-    if (weight) myUser.weight = weight;
     if (dailyCalories) myUser.dailyCalories = dailyCalories;
     const updatedUser = await myUser.save();
     res.json({
